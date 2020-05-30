@@ -19,18 +19,36 @@ class Headers {
 public:
   std::string get_response() {
     std::stringstream response_stream;
-    // TODO read from files
-    if (url == "/") {
-      std::string content = "<html><body><h1>Hello World</h1><p>This is a web "
-                            "server in using asio</p></body></html>";
-      response_stream << "HTTP/1.1 200 OK" << std::endl;
+
+    FILE *fp;
+    std::string path = url;
+
+    if (path == "/") {
+      path = "/index.html";
+    }
+    if (path.find("../") != -1) {
+      path = "/403.html";
+    }
+    path = "./web" + path;
+
+    if ((fp = fopen(path.c_str(), "rb")) == nullptr) {
+      std::string content = "<html><body><h1>404 Not Found</h1></body></html>";
+      response_stream << "HTTP/1.1 404 Not Found" << std::endl;
       response_stream << "content-type: text/html" << std::endl;
       response_stream << "content-length: " << content.length() << std::endl;
       response_stream << std::endl;
       response_stream << content;
     } else {
-      std::string content = "<html><body><h1>404 Not Found</h1></body></html>";
-      response_stream << "HTTP/1.1 404 Not Found" << std::endl;
+      std::stringstream content_stream;
+      char buffer[6969];
+      long n;
+
+      while ((n = fread(buffer, 1, 6969, fp)) > 0)
+        content_stream << buffer;
+      fclose(fp);
+
+      std::string content = content_stream.str();
+      response_stream << "HTTP/1.1 200 OK" << std::endl;
       response_stream << "content-type: text/html" << std::endl;
       response_stream << "content-length: " << content.length() << std::endl;
       response_stream << std::endl;
