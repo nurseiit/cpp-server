@@ -34,3 +34,7 @@
 # System & IDE
 **/.DS_Store
 **/.vscode/
+
+# Binaries
+client
+server
